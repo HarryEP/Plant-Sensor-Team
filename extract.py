@@ -1,5 +1,7 @@
 """Modules docstring"""
 import requests
+import json
+from datetime import datetime
 
 
 def load_plant_by_id(plant_id: int) -> dict:
@@ -19,17 +21,39 @@ def get_total_number_of_plants() -> int:
         timeout=10)
     plant_data = response.json()
 
+    if plant_data.get("plants_on_display") is None:
+        return 0
+
     return plant_data.get("plants_on_display")
 
 
-if __name__ == "__main__":
-    # print(load_plant_by_id(4))
-    # print(load_plant_by_id(44))
-    # print(load_plant_by_id(54))
-    # print(load_plant_by_id(11))
-    # when testing at 12:34 on 29/08/23, plant 43 was on loan to another museum
-    # print(load_plant_by_id(43))
-    # plant 0 is valid
-    # print(load_plant_by_id(0))
+def check_api_status_code(response) -> bool:
+    """Raises an error if there is an issue with the API response"""
+    status_code = response.status_code
+    if status_code == 200:
+        return True
+    return False
 
-    print(get_total_number_of_plants())
+
+def write_valid_plant_data_to_file():
+    """Writes the plant data to a json file"""
+    plant_data = []
+
+    for p in range(0, 51):
+        try:
+            plant = load_plant_by_id(p)
+            if 'error' not in plant.keys():
+                plant_data.append(plant)
+        # TODO Needs to stop with keyboard
+        except:
+            pass
+
+    filename = f'live_{datetime.now()}.json'
+
+    with open(filename, 'w') as file:
+        json.dump(plant_data, file, indent=4)
+
+
+if __name__ == "__main__":
+
+    write_valid_plant_data_to_file()
