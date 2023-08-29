@@ -1,7 +1,8 @@
-"""Modules docstring"""
-import requests
+"""This file extracts the plant data from the API
+    and saves it as a JSON file"""
 import json
 from datetime import datetime
+import requests
 
 
 def load_plant_by_id(plant_id: int) -> dict:
@@ -15,18 +16,6 @@ def load_plant_by_id(plant_id: int) -> dict:
     return plant_data
 
 
-def get_total_number_of_plants() -> int:
-    response = requests.get(
-        f'https://data-eng-plants-api.herokuapp.com',
-        timeout=10)
-    plant_data = response.json()
-
-    if plant_data.get("plants_on_display") is None:
-        return 0
-
-    return plant_data.get("plants_on_display")
-
-
 def check_api_status_code(response) -> bool:
     """Raises an error if there is an issue with the API response"""
     status_code = response.status_code
@@ -35,7 +24,7 @@ def check_api_status_code(response) -> bool:
     return False
 
 
-def write_valid_plant_data_to_file():
+def write_valid_plant_data_to_json_file():
     """Writes the plant data to a json file"""
     plant_data = []
 
@@ -56,4 +45,4 @@ def write_valid_plant_data_to_file():
 
 if __name__ == "__main__":
 
-    write_valid_plant_data_to_file()
+    write_valid_plant_data_to_json_file()
