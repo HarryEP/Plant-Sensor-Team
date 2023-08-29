@@ -1,4 +1,5 @@
 venv/
+live*.json
 
 # terraform
 terraform.tfvars
