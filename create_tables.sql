@@ -26,11 +26,11 @@ CREATE TABLE plant (
 
 CREATE TABLE recording (
     id BIGINT GENERATED ALWAYS AS IDENTITY,
-    recorded TIMESTAMP NOT NULL,
+    recorded TIMESTAMPTZ NOT NULL,
     plant_id SMALLINT NOT NULL,
     temperature FLOAT NOT NULL,
     soil_moisture FLOAT NOT NULL,
-    watered TIMESTAMP NOT NULL,
+    watered TIMESTAMPTZ NOT NULL,
     sunlight SUNLIGHT_TYPES,
     PRIMARY KEY (id),
     FOREIGN KEY (plant_id) REFERENCES plant (id)
