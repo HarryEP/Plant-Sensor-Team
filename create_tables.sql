@@ -2,7 +2,7 @@ DROP DATABASE IF EXISTS plant_monitor;
 
 CREATE DATABASE plant_monitor;
 
-/c plant_monitor;
+\c plant_monitor;
 
 CREATE TYPE SUNLIGHT_TYPES AS ENUM ('full_sun', 'partial_sun', 'full_shade');
 
@@ -33,5 +33,5 @@ CREATE TABLE recording (
     watered TIMESTAMP NOT NULL,
     sunlight SUNLIGHT_TYPES,
     PRIMARY KEY (id),
-    FOREIGN KEY plant_id REFERENCES plant (id)
+    FOREIGN KEY (plant_id) REFERENCES plant (id)
 );
