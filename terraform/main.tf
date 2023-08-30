@@ -8,6 +8,7 @@ terraform {
   required_version = ">= 1.2.0"
 }
 
+
 provider "aws" {
     region = "eu-west-2"
 }
@@ -119,27 +120,18 @@ resource "aws_ecs_cluster" "cluster" {
 resource "aws_ecr_repository" "pipeline-repository" {
     name = "plants-vs-trainees-pipeline-ecr"
     image_tag_mutability = "MUTABLE"
-    image_scanning_configuration {
-        scan_on_push = true
-    }
 }
 
 
 resource "aws_ecr_repository" "dashboard-repository" {
     name = "plants-vs-trainees-dashboard-ecr"
     image_tag_mutability = "MUTABLE"
-    image_scanning_configuration {
-        scan_on_push = true
-    }
 }
 
 
 resource "aws_ecr_repository" "lambda-repository" {
     name = "plants-vs-trainees-lambda-ecr"
     image_tag_mutability = "MUTABLE"
-    image_scanning_configuration {
-        scan_on_push = true
-    }
 }
 
 
@@ -255,6 +247,25 @@ resource "aws_ecs_service" "dashboard-service" {
 
     network_configuration {
         security_groups  = [aws_security_group.allow-traffic-to-dashboard.id]
+        subnets          = ["subnet-0667517a2a13e2a6b","subnet-0cec5bdb9586ed3c4", "subnet-03b1a3e1075174995"]
+        assign_public_ip = true
+    }
+}
+
+
+resource "aws_ecs_service" "pipeline-service" {
+    name                               = "plants-vs-trainees-pipeline-service"
+    cluster                            = resource.aws_ecs_cluster.cluster.id
+    task_definition                    = resource.aws_ecs_task_definition.pipeline-task-definition.arn
+    desired_count                      = 1
+    deployment_minimum_healthy_percent = 50
+    deployment_maximum_percent         = 200
+    platform_version                   = "1.4.0"
+    launch_type                        = "FARGATE"
+    scheduling_strategy                = "REPLICA"
+
+    network_configuration {
+        security_groups  = [aws_security_group.allow-traffic-to-dashboard.id, aws_security_group.allow-traffic-to-db.id]
         subnets          = ["subnet-0667517a2a13e2a6b","subnet-0cec5bdb9586ed3c4", "subnet-03b1a3e1075174995"]
         assign_public_ip = true
     }
