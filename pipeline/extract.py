@@ -42,7 +42,7 @@ def write_valid_plant_data_to_json_file():
     """Writes the plant data to a json file"""
     plant_data = []
 
-    for p in range(0, 53):
+    for p in range(0, 51):
         try:
             plant = load_plant_by_id(p)
             if 'error' not in plant.keys():
