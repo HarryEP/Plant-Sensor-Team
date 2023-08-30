@@ -7,7 +7,7 @@ Please run the following to setup your database locally:  \
 `psql -d postgres -f create_tables.sql`
 
 Please run the following to setup database remotely:  \
-`psql --host plants-vs-trainees-db.c57vkec7dkkx.eu-west-2.rds.amazonaws.com --port 5439 -U secretweapon plant_monitor`
+`psql --host plants-vs-trainees-db.c57vkec7dkkx.eu-west-2.rds.amazonaws.com --port 5432 -U secretweapon plant_monitor`
 
 ### Questions about data
 
