@@ -15,7 +15,7 @@ def cleaning_botanist(dataframe: pd.DataFrame) -> pd.DataFrame:
     dataframe["email"] = dataframe["botanist"].apply(lambda x: x["email"])
     dataframe["phone"] = dataframe["botanist"].apply(lambda x: x["phone"])
     dataframe = dataframe.drop("botanist", axis=1)
-    
+
     return dataframe
 
 
@@ -25,9 +25,9 @@ def convert_times_with_timestamp(dataframe: pd.DataFrame) -> pd.DataFrame:
 
     dataframe["recording_taken"] = pd.to_datetime(dataframe["recording_taken"]).dt.tz_localize(pytz.utc)
     dataframe["recording_taken"] = dataframe["recording_taken"].dt.tz_convert(gmt)
-    
+
     dataframe["last_watered"] = pd.to_datetime(dataframe["last_watered"]).dt.tz_localize(gmt)
-    
+
     return dataframe
 
 
@@ -39,20 +39,20 @@ def convert_sunlight(sunlight:list)->str:
 
         if any(sun in ['part shade', 'part sun', 'part sun/part shade'] for sun in sunlight):
             return "partial_sun"
-        
+
         if "full sun" in sunlight:
             return "full_sun"
-        
+
         if "full shade" in sunlight:
             return "full_shade"
-    
+
     return None
 
 
 def clean_sunlight_column(dataframe: pd.DataFrame) -> pd.DataFrame:
     """Converts sunlight column to consistent format ready for loading"""
     dataframe["sunlight"] = dataframe["sunlight"].apply(convert_sunlight)
-    
+
     return dataframe
 
 

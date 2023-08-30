@@ -4,7 +4,7 @@ CREATE DATABASE plant_monitor;
 
 \c plant_monitor;
 
-CREATE TYPE SUNLIGHT_TYPES AS ENUM ('full_sun', 'partial_sun', 'full_shade');
+CREATE TYPE SUNLIGHT_TYPES AS ENUM ('full_sun', 'partial_sun', 'full_shade', 'Null');
 
 CREATE TABLE botanist(
     id SMALLINT GENERATED ALWAYS AS IDENTITY,
@@ -17,6 +17,7 @@ CREATE TABLE botanist(
 CREATE TABLE plant (
     id SMALLINT GENERATED ALWAYS AS IDENTITY,
     general_name VARCHAR NOT NULL,
+    plant_id SMALLINT UNIQUE,
     scientific_name VARCHAR,
     cycle VARCHAR,
     botanist_id SMALLINT NOT NULL,
