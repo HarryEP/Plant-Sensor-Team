@@ -1,6 +1,10 @@
 venv/
 live*.json
 
+
+#
+data/
+
 # terraform
 terraform.tfvars
 .terraform
