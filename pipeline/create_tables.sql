@@ -8,7 +8,7 @@ CREATE TYPE SUNLIGHT_TYPES AS ENUM ('full_sun', 'partial_sun', 'full_shade');
 
 CREATE TABLE botanist(
     id SMALLINT GENERATED ALWAYS AS IDENTITY,
-    botanist_name VARCHAR NOT NULL,
+    botanist_name VARCHAR NOT NULL UNIQUE,
     email VARCHAR NOT NULL,
     phone VARCHAR NOT NULL,
     PRIMARY KEY (id)
