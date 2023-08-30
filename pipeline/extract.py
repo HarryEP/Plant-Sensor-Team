@@ -1,9 +1,9 @@
 """This file extracts the plant data from the API
     and saves it as a JSON file"""
 import json
-from datetime import datetime
 import requests
 
+PLANT_JSON = "data/live_plants.json"
 
 def load_plant_by_id(plant_id: int) -> dict:
     """Given a plant id, load the plant"""
@@ -37,12 +37,10 @@ def write_valid_plant_data_to_json_file():
         except:
             pass
 
-    filename = f'live_{datetime.now()}.json'
-
-    with open(filename, 'w') as file:
+    with open(PLANT_JSON, 'w') as file:
         json.dump(plant_data, file, indent=4)
 
 
 if __name__ == "__main__":
-
     write_valid_plant_data_to_json_file()
+
