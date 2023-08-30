@@ -19,9 +19,9 @@ def get_connection(host_name, db_name, password, user):
 
 def write_columns(conn: connection, dataframe):
     botanist = dataframe[["botanist_name", "email", "phone"]]
-    # plant = dataframe["general_name",
-    #   "scientific_name", "cycle", "botanist_name"]
-    # recording = dataframe["recorded", "plant_id", "temperature", "soil_moisture", "watered", "sunlight"]
+    plant = dataframe["general_name",
+      "scientific_name", "cycle", "botanist_name"]
+    #recording = dataframe["recorded", "plant_id", "temperature", "soil_moisture", "watered", "sunlight"]
     write_to_botanist_table(conn, botanist)
     # write_to_plant_table(conn, plant)
     # write_to_recording_table(conn, recording)
