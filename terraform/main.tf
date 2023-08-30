@@ -37,7 +37,7 @@ resource "aws_security_group" "allow-traffic-to-dashboard"{
     ingress {
         from_port   = 80
         to_port     = 80
-        protocol    = "http"
+        protocol    = "tcp"
         cidr_blocks = ["0.0.0.0/0"]
     }
     egress {
@@ -45,6 +45,36 @@ resource "aws_security_group" "allow-traffic-to-dashboard"{
         to_port          = 5432
         protocol         = "tcp"
         cidr_blocks      = ["0.0.0.0/0"]
+    }
+}
+
+
+resource "aws_security_group" "allow-traffic-to-lambda"{
+    name = "plants-vs-trainees-lambda"
+    vpc_id = "vpc-0e0f897ec7ddc230d"
+    ingress {
+        from_port   = 80
+        to_port     = 80
+        protocol    = "tcp"
+        cidr_blocks = ["0.0.0.0/0"]
+    }
+    egress {
+        from_port        = 5432
+        to_port          = 5432
+        protocol         = "tcp"
+        cidr_blocks      = ["0.0.0.0/0"]
+    }
+    egress {
+        from_port        = 0
+        to_port          = 0
+        protocol         = "-1"
+        cidr_blocks      = ["0.0.0.0/0"]
+    }
+    egress {
+        from_port   = 80
+        to_port     = 80
+        protocol    = "tcp"
+        cidr_blocks = ["0.0.0.0/0"]
     }
 }
 
@@ -92,6 +122,15 @@ resource "aws_ecr_repository" "dashboard-repository" {
 }
 
 
+resource "aws_ecr_repository" "lambda-repository" {
+    name = "plants-vs-trainees-lambda-ecr"
+    image_tag_mutability = "MUTABLE"
+    image_scanning_configuration {
+        scan_on_push = true
+    }
+}
+
+
 resource "aws_iam_role" "ecs_role" {
   name = "ecs_role"
 
@@ -125,7 +164,7 @@ resource "aws_ecs_task_definition" "dashboard-task-definition" {
 [
   {
     "name": "plants-vs-trainees-dashboard-definition",
-    "image": "${aws_ecr_repository.dashboard-repository.url}:latest",
+    "image": "${aws_ecr_repository.dashboard-repository.repository_url}:latest",
     "essential": true,
     "portMappings": [
       {
@@ -164,7 +203,7 @@ resource "aws_ecs_task_definition" "pipeline-task-definition" {
 [
   {
     "name": "plants-vs-trainees-task-pipeline-definition",
-    "image": "${aws_ecr_repository.pipeline-repository.url}:latest",
+    "image": "${aws_ecr_repository.pipeline-repository.repository_url}:latest",
     "essential": true,
     "portMappings": [
       {
@@ -203,9 +242,75 @@ resource "aws_ecs_service" "dashboard-service" {
     scheduling_strategy                = "REPLICA"
 
     network_configuration {
-        security_groups  = [data.aws_security_group.allow-traffic-to-dashboard.id]
+        security_groups  = [aws_security_group.allow-traffic-to-dashboard.id]
         subnets          = ["subnet-0667517a2a13e2a6b","subnet-0cec5bdb9586ed3c4", "subnet-03b1a3e1075174995"]
         assign_public_ip = true
     }
 }
 
+resource "aws_iam_role" "lambda-role" {
+  name = "plants-vs-trainees-lambda-role"
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Action = "sts:AssumeRole"
+      Effect = "Allow"
+      Principal = {
+        Service = "lambda.amazonaws.com"
+      }
+    }]
+  })
+}
+
+resource "aws_iam_policy" "lambda-policy" {
+  name        = "plants-vs-trainees-policy"
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Effect = "Allow"
+      Action = [
+        "logs:CreateLogGroup",
+        "logs:CreateLogStream",
+        "logs:PutLogEvents"
+      ]
+      Resource = ["arn:aws:logs:*:*:*"]
+    },{
+      Effect = "Allow"
+      Action = [
+        "ec2:CreateNetworkInterface",
+        "ec2:DescribeNetworkInterfaces",
+        "ec2:DeleteNetworkInterface"
+      ]
+      Resource = ["*"]
+    }]
+  })
+}
+
+resource "aws_iam_role_policy_attachment" "role-and-policy" {
+  policy_arn = aws_iam_policy.lambda-policy.arn
+  role = aws_iam_role.lambda-role.name
+}
+
+# resource "aws_lambda_function" "lambda-function" {
+#   function_name = "plants-vs-trainees-storage-lambda"
+#   timeout       = 5 # seconds
+#   image_uri     = "${aws_ecr_repository.lambda-repository.repository_url}:latest"
+#   package_type  = "Image"
+
+#   role = aws_iam_role.lambda-role.arn
+#   environment {
+#   variables = {
+#         "DB_PASSWORD" = var.db_password
+#         "DB_USERNAME" = var.db_username,
+#         "DB_PORT" = var.db_port
+#         "DB_NAME" = var.db_name
+#         "ACCESS_KEY_ID" = var.access_key_id
+#         "SECRET_ACCESS_KEY" = var.secret_access_key
+#         "DB_HOST" = aws_db_instance.db-plants.endpoint
+#     }
+#   }
+#   vpc_config {
+#         security_group_ids  = [aws_security_group.allow-traffic-to-lambda.id]
+#         subnet_ids          = ["subnet-0667517a2a13e2a6b","subnet-0cec5bdb9586ed3c4","subnet-03b1a3e1075174995"]
+#     }
+#   }
