@@ -14,3 +14,13 @@ terraform.tfstate.backup
 
 # other
 .env
+
+
+# Python cache files
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Pytest cache
+.pytest_cache/
