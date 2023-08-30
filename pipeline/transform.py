@@ -1,12 +1,17 @@
+"""Cleans json data from extract using pandas, outputs as a csv file"""
 import os
 import pandas as pd
 import pytz
 
+PLANT_JSON = "data/live_plants.json"
+PLANT_CSV = "data/plants.csv"
+DATA_FOLDER = "data"
 
 
 def cleaning_botanist(dataframe: pd.DataFrame) -> pd.DataFrame:
     """Flattens botanist column into name, email, phone"""
-    dataframe["plant_name"] = dataframe["botanist"].apply(lambda x: x["name"])
+    dataframe = dataframe.rename(columns={"name" : "plant_name"})
+    dataframe["botanist_name"] = dataframe["botanist"].apply(lambda x: x["name"])
     dataframe["email"] = dataframe["botanist"].apply(lambda x: x["email"])
     dataframe["phone"] = dataframe["botanist"].apply(lambda x: x["phone"])
     dataframe = dataframe.drop("botanist", axis=1)
@@ -52,13 +57,13 @@ def clean_sunlight_column(dataframe: pd.DataFrame) -> pd.DataFrame:
 
 
 if __name__ == "__main__":
-    plant_df = pd.read_json("sample.json")
+    plant_df = pd.read_json(PLANT_JSON)
     plant_df = cleaning_botanist(plant_df)
     plant_df = convert_times_with_timestamp(plant_df)
     plant_df = clean_sunlight_column(plant_df)
 
-    if not os.path.exists("data/"):
-        os.mkdir("data")
-    plant_df.to_csv("data/plants.csv", index=False)
-    
+    if not os.path.exists(DATA_FOLDER):
+        os.mkdir(DATA_FOLDER)
+    plant_df.to_csv(PLANT_CSV, index=False)
+    os.remove(PLANT_JSON)
     
