@@ -124,24 +124,27 @@ resource "aws_ecs_task_definition" "dashboard-task-definition" {
   container_definitions = jsonencode(
 [
   {
-    "name": "c8-ieva-tf-dashboard",
+    "name": "plants-vs-trainees-dashboard-definition",
     "image": "${aws_ecr_repository.dashboard-repository.url}:latest",
     "essential": true,
     "portMappings": [
       {
-        "containerPort": 8501,
-        "hostPort": 8501
+        "containerPort": 80,
+        "hostPort": 80
+      },
+      {
+        "containerPort": 5432,
+        "hostPort": 5432
       }
     ],
     "environment" : [
         {"name" : "DB_PASSWORD", "value" : var.db_password},
-        {"name" : "DB_USER", "value" : var.db_username},
+        {"name" : "DB_USERNAME", "value" : var.db_username},
         {"name" : "DB_PORT", "value" : var.db_port},
         {"name" : "DB_NAME", "value" : var.db_name},
         {"name" : "ACCESS_KEY_ID", "value" : var.access_key_id},
         {"name" : "SECRET_ACCESS_KEY", "value" : var.secret_access_key},
-        {"name" : "DB_HOST", "value" : var.db_host},
-        {"name" : "DB_SCHEMA", "value" : var.db_schema}
+        {"name" : "DB_HOST", "value" : aws_db_instance.db-plants.endpoint}
       ]
   }
 ]
@@ -149,13 +152,60 @@ resource "aws_ecs_task_definition" "dashboard-task-definition" {
 }
 
 
-resource "aws_ecs_task_definition" "name" {
-
+resource "aws_ecs_task_definition" "pipeline-task-definition" {
+  family                = "plants-vs-trainees-pipeline-definition"
+  requires_compatibilities = ["FARGATE"]
+  network_mode             = "awsvpc"
+  cpu                      = "256"
+  memory                   = "0.5GB"
+  task_role_arn            = aws_iam_role.ecs_role.arn
+  execution_role_arn= "arn:aws:iam::129033205317:role/ecsTaskExecutionRole"
+  container_definitions = jsonencode(
+[
+  {
+    "name": "plants-vs-trainees-task-pipeline-definition",
+    "image": "${aws_ecr_repository.pipeline-repository.url}:latest",
+    "essential": true,
+    "portMappings": [
+      {
+        "containerPort": 80,
+        "hostPort": 80
+      },
+      {
+        "containerPort": 5432,
+        "hostPort": 5432
+      }
+    ],
+    "environment" : [
+        {"name" : "DB_PASSWORD", "value" : var.db_password},
+        {"name" : "DB_USERNAME", "value" : var.db_username},
+        {"name" : "DB_PORT", "value" : var.db_port},
+        {"name" : "DB_NAME", "value" : var.db_name},
+        {"name" : "ACCESS_KEY_ID", "value" : var.access_key_id},
+        {"name" : "SECRET_ACCESS_KEY", "value" : var.secret_access_key},
+        {"name" : "DB_HOST", "value" : aws_db_instance.db-plants.endpoint}
+      ]
+  }
+]
+)
 }
 
-resource "aws_ecs_service" "c8-pvst-pipeline-ecs" {
 
+resource "aws_ecs_service" "dashboard-service" {
+    name                               = "plants-vs-trainees-dashboard-service"
+    cluster                            = resource.aws_ecs_cluster.cluster.id
+    task_definition                    = resource.aws_ecs_task_definition.dashboard-task-definition.arn
+    desired_count                      = 1
+    deployment_minimum_healthy_percent = 50
+    deployment_maximum_percent         = 200
+    platform_version                   = "1.4.0"
+    launch_type                        = "FARGATE"
+    scheduling_strategy                = "REPLICA"
+
+    network_configuration {
+        security_groups  = [data.aws_security_group.allow-traffic-to-dashboard.id]
+        subnets          = ["subnet-0667517a2a13e2a6b","subnet-0cec5bdb9586ed3c4", "subnet-03b1a3e1075174995"]
+        assign_public_ip = true
+    }
 }
-
-
 
