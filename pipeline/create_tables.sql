@@ -16,6 +16,7 @@ CREATE TABLE botanist(
 
 CREATE TABLE plant (
     id SMALLINT GENERATED ALWAYS AS IDENTITY,
+    plant_id SMALLINT NOT NULL,
     general_name VARCHAR NOT NULL,
     scientific_name VARCHAR,
     cycle VARCHAR,
