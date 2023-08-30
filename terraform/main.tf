@@ -12,8 +12,9 @@ provider "aws" {
     region = "eu-west-2"
 }
 
+
 resource "aws_security_group" "allow-traffic-to-db"{
-    name = "c8-plants-vs-trainees-sg"
+    name = "plants-vs-trainees-database"
     vpc_id = "vpc-0e0f897ec7ddc230d"
     ingress {
         from_port = 5432
@@ -26,7 +27,30 @@ resource "aws_security_group" "allow-traffic-to-db"{
         to_port          = 0
         protocol         = "-1"
         cidr_blocks      = ["0.0.0.0/0"]
-        ipv6_cidr_blocks = ["::/0"]
+  }
+}
+
+
+resource "aws_security_group" "allow-traffic-to-dashboard"{
+    name = "plants-vs-trainees-dashboard"
+    vpc_id = "vpc-0e0f897ec7ddc230d"
+    ingress {
+        from_port = 5439
+        to_port = 5439
+        protocol = "tcp"
+        cidr_blocks = ["0.0.0.0/0"]
+    }
+    ingress {
+        from_port   = 80
+        to_port     = 80
+        protocol    = "http"
+        cidr_blocks = ["0.0.0.0/0"]
+    }
+    egress {
+        from_port        = 0
+        to_port          = 0
+        protocol         = "-1"
+        cidr_blocks      = ["0.0.0.0/0"]
   }
 }
 
@@ -46,6 +70,11 @@ resource "aws_db_instance" "db-plants" {
 }
 
 
-resource "aws_s3_bucket" "c8-plants-vs-trainees" {
-  bucket = "c8-plants-vs-trainees"
-}
+# resource "aws_s3_bucket" "c8-plants-vs-trainees" {
+#   bucket = "c8-plants-vs-trainees"
+# }
+
+
+
+
+
