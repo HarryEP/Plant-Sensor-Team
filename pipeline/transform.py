@@ -55,12 +55,17 @@ def clean_sunlight_column(dataframe: pd.DataFrame) -> pd.DataFrame:
 
     return dataframe
 
+def clean_moisture_column(dataframe: pd.DataFrame)->pd.DataFrame:
+    """Drops rows from dataframe with a negative soil_moisture value"""
+    return dataframe[dataframe.soil_moisture >= 0]
+
 # TODO: clean negative moisture values, remove outlier temp values
 if __name__ == "__main__":
     plant_df = pd.read_json(PLANT_JSON)
     plant_df = cleaning_botanist(plant_df)
     plant_df = convert_times_with_timestamp(plant_df)
     plant_df = clean_sunlight_column(plant_df)
+    plant_df = clean_moisture_column(plant_df)
 
     if not os.path.exists(DATA_FOLDER):
         os.mkdir(DATA_FOLDER)
