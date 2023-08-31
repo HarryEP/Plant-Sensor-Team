@@ -6,7 +6,6 @@
 Please run the following to setup your database locally:  \
 `psql -d postgres -f create_tables.sql`
 
-
 ### Questions about data
 
 - Some plants do not have sunlight recorded, some others have both full and partial sunlight; raise issue with LMNH to adjust their raspberry pi.
