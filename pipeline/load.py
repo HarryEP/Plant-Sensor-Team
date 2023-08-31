@@ -1,3 +1,4 @@
+"""Uploads recordings, plants, and botanists to the database"""
 import os
 import psycopg2
 import pandas as pd
@@ -9,7 +10,8 @@ PLANT_JSON = "data/live_plants.json"
 PLANTS_CSV = "data/plants.csv"
 
 
-def get_connection(host_name, db_name, password, user):
+def get_connection(host_name:str, db_name:str, password:str, user:str):
+    """Connects to the database"""
     conn = psycopg2.connect(host=host_name,
                             dbname=db_name,
                             password=password,
@@ -83,7 +85,7 @@ def write_to_recording_table(conn:connection, dataframe:pd.DataFrame):
             """
         cur.executemany(sql, records)
 
-    conn.commit() 
+    conn.commit()
 
 
 if __name__ == "__main__":

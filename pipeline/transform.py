@@ -63,14 +63,20 @@ def clean_temperature_column(dataframe: pd.DataFrame)->pd.DataFrame:
     """Removes large outlier temperature values"""
     return dataframe[dataframe.temperature <=45]
 
-# TODO: clean negative moisture values, remove outlier temp values
+def clean_data(dataframe: pd.DataFrame)->pd.DataFrame:
+    """Function that calls or sub-routine cleaning functions"""
+    dataframe = cleaning_botanist(dataframe)
+    dataframe = convert_times_with_timestamp(dataframe)
+    dataframe = clean_sunlight_column(dataframe)
+    dataframe = clean_moisture_column(dataframe)
+    dataframe = clean_temperature_column(dataframe)
+
+    return dataframe
+
+
 if __name__ == "__main__":
     plant_df = pd.read_json(PLANT_JSON)
-    plant_df = cleaning_botanist(plant_df)
-    plant_df = convert_times_with_timestamp(plant_df)
-    plant_df = clean_sunlight_column(plant_df)
-    plant_df = clean_moisture_column(plant_df)
-    plant_df = clean_temperature_column(plant_df)
+    plant_df = clean_data(plant_df)
 
     if not os.path.exists(DATA_FOLDER):
         os.mkdir(DATA_FOLDER)
