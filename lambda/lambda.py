@@ -31,7 +31,7 @@ def get_plant_data(conn):
     recording.sunlight,
     botanist.botanist_name 
     FROM plant
-    LEFT JOIN recording ON plant.plant_id = recording.plant_id
+    LEFT JOIN recording ON plant.id = recording.plant_id
     LEFT JOIN botanist ON plant.botanist_id = botanist.id;"""
 
     with conn.cursor() as cur:
@@ -73,20 +73,3 @@ def lambda_handler(event, context):
         'statusCode': 200,
         'body': 'CSV file uploaded successfully'
     }
-
-
-if __name__ == "__main__":
-    load_dotenv()
-    conn = get_connection(host_name=os.environ["DB_HOST"], db_name=os.environ["DB_NAME"],
-                          password=os.environ["DB_PASSWORD"], user=os.environ["DB_USERNAME"])
-    df = get_plant_data(conn)
-    df.to_csv(f'plant_{datetime.date.today()}_data.csv', index=False)
-    amazon_s3 = client("s3", region_name="eu-west-2",
-                       aws_access_key_id=os.environ["ACCESS_KEY_ID"],
-                       aws_secret_access_key=os.environ["SECRET_ACCESS_KEY_ID"])
-
-    amazon_s3.upload_file(
-        f'plant_{datetime.date.today()}_data.csv',
-        'plants-vs-trainees-long-term-storage',
-        f'plant_{datetime.date.today()}_data.csv'
-    )
