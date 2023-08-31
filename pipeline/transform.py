@@ -55,7 +55,7 @@ def clean_sunlight_column(dataframe: pd.DataFrame) -> pd.DataFrame:
 
     return dataframe
 
-
+# TODO: clean negative moisture values, remove outlier temp values
 if __name__ == "__main__":
     plant_df = pd.read_json(PLANT_JSON)
     plant_df = cleaning_botanist(plant_df)
