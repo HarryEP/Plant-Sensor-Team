@@ -5,6 +5,7 @@ from psycopg2.extensions import connection
 from dotenv import load_dotenv
 
 def remove_old_recordings(conn:connection):
+    """Removes entries from the recording table older than a day"""
     with conn.cursor() as cur:
         sql = """
             DELETE FROM recording
@@ -15,8 +16,9 @@ def remove_old_recordings(conn:connection):
 
 if __name__ == "__main__":
     load_dotenv()
-    db_conn = psycopg2.connect(host_name=os.environ["DB_HOST"], db_name= os.environ["DB_NAME"],
+    db_conn = psycopg2.connect(host=os.environ["DB_HOST"], dbname= os.environ["DB_NAME"],
                              password=os.environ["DB_PASSWORD"], user=os.environ["DB_USERNAME"],
                              cursor_factory=RealDictCursor)
+    remove_old_recordings(db_conn)
     db_conn.close()
 
