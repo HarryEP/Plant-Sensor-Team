@@ -5,6 +5,9 @@ live*.json
 #
 data/
 
+# jupyter
+*.ipynb
+
 # terraform
 terraform.tfvars
 .terraform
