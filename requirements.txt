@@ -1,2 +1,7 @@
 requests
 pandas
+boto3
+botocore
+python-dotenv
+psycopg2-binary
+datetime
