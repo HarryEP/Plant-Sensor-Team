@@ -4,8 +4,8 @@ import pandas as pd
 from psycopg2.extras import RealDictCursor
 from psycopg2.extensions import connection
 from dotenv import load_dotenv
-import numpy as np
 
+PLANT_JSON = "data/live_plants.json"
 PLANTS_CSV = "data/plants.csv"
 
 
@@ -47,7 +47,7 @@ def write_to_plant_table(conn: connection, dataframe: pd.DataFrame):
     """Uploads plant details to the plant table in db"""
     dataframe.loc[:, "plant_id"] = dataframe["plant_id"].astype("object")
     records = dataframe.to_records(index=False)
-    
+
     with conn.cursor() as cur:
         sql = """
             INSERT INTO plant (general_name, scientific_name, cycle, plant_id, botanist_id)
@@ -55,7 +55,7 @@ def write_to_plant_table(conn: connection, dataframe: pd.DataFrame):
             ON CONFLICT DO NOTHING;
             """
         cur.executemany(sql, records)
-    
+
     conn.commit()
 
 
@@ -77,7 +77,7 @@ def write_to_recording_table(conn:connection, dataframe:pd.DataFrame):
             VALUES (%s, ROUND(%s, 3), ROUND(%s, 3), %s, %s, (SELECT id FROM plant WHERE plant.plant_id = %s));
             """
         cur.executemany(sql, records)
-    
+
     conn.commit() 
 
 
@@ -89,4 +89,3 @@ if __name__ == "__main__":
 
     plant_df = pd.read_csv(PLANTS_CSV)
     write_columns(db_conn, plant_df)
-    
