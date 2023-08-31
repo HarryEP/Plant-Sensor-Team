@@ -1,3 +1,4 @@
+"""Removes rows older than a day old from the recording table"""
 import os
 import psycopg2
 from psycopg2.extras import RealDictCursor
@@ -21,4 +22,3 @@ if __name__ == "__main__":
                              cursor_factory=RealDictCursor)
     remove_old_recordings(db_conn)
     db_conn.close()
-

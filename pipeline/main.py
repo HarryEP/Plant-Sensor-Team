@@ -4,7 +4,7 @@ import os
 import pandas as pd
 from dotenv import load_dotenv
 from extract import write_valid_plant_data_to_json_file
-from transform import clean_sunlight_column, cleaning_botanist, convert_times_with_timestamp
+from transform import clean_data
 from load import get_connection, write_columns
 from empty_db import remove_old_recordings
 
@@ -12,15 +12,13 @@ PLANT_JSON = "data/live_plants.json"
 
 if __name__ == "__main__":
     load_dotenv()
-    
+
     start = time.time()
     while True:
         print("tick")
         write_valid_plant_data_to_json_file()
         plant_df = pd.read_json(PLANT_JSON)
-        plant_df = cleaning_botanist(plant_df)
-        plant_df = convert_times_with_timestamp(plant_df)
-        plant_df = clean_sunlight_column(plant_df)
+        plant_df = clean_data(plant_df)
         os.remove(PLANT_JSON)
 
         load_dotenv()

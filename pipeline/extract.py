@@ -1,14 +1,14 @@
 """This file extracts the plant data from the API
     and saves it as a JSON file"""
 import json
-import requests
 import os
+import requests
 
 PLANT_JSON = "data/live_plants.json"
 
 
 class APIException(Exception):
-
+    """Custom exception for API errors, with error message and http status code"""
     def __init__(self, message, code):
         self.message = message
         self.code = code
@@ -42,14 +42,13 @@ def write_valid_plant_data_to_json_file():
     """Writes the plant data to a json file"""
     plant_data = []
 
-    for p in range(0, 51):
+    for plant in range(0, 51):
         try:
-            plant = load_plant_by_id(p)
+            plant = load_plant_by_id(plant)
             if 'error' not in plant.keys():
                 plant_data.append(plant)
-        # TODO Needs to stop with keyboard
         except APIException as err:
-            print(f"plant {p}: {err.code}, {err.message}")
+            print(f"plant {plant}: {err.code}, {err.message}")
             continue
 
     if not os.path.exists("data"):
