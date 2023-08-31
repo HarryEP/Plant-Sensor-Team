@@ -100,13 +100,71 @@ def get_image_url_of_plant(plant_name):
 def current_plant_data(df, plant_ids: list):
     """Displays dataframe with info for plant(s)"""
     if len(plant_ids) != 0:
-        filtered_df = df[df['plant_id'].isin(plant_ids)]
-        st.dataframe(filtered_df)
+        plant_df = df[df['plant_id'].isin(plant_ids)]
+        st.dataframe(plant_df)
+
         if len(plant_ids) == 1:
+            plant_name = plant_df['general_name'].unique()[0]
+            scientific_name = plant_df['scientific_name'].unique()[0]
+
+            # TODO error handling, some plants don't have recorded
+            plant_temperature_over_time(joined_df, plant_ids[0])
+            plant_soil_moisture_over_time(joined_df, plant_ids[0])
+
+            cols = st.columns(2)
+            with cols[0]:
+                st.markdown(f"### Plant Name: {plant_name} ")
+            if scientific_name != "NaN":
+                with cols[1]:
+                    st.write(f"### Scientific Name: {scientific_name[2:-2]} ")
 
             st.image(get_image_url_of_plant("test"), caption='')
     else:
         st.write(df)
+
+
+def plant_temperature_over_time(df, plant_id):
+    """Plots the plant temperature over time as line graph"""
+    df = df[df['plant_id'] == plant_id]
+    recorded_and_temperature = df[['recorded', 'temperature']]
+    print(recorded_and_temperature)
+
+    padding = 0.8
+    min_temperature = recorded_and_temperature['temperature'].min()
+    max_temperature = recorded_and_temperature['temperature'].max()
+    y_range = max_temperature - min_temperature
+    padded_min = min_temperature - padding * y_range
+    padded_max = max_temperature + padding * y_range
+
+    chart = alt.Chart(recorded_and_temperature).mark_line().encode(
+        x='recorded:T',
+        y=alt.Y('temperature:Q', scale=alt.Scale(
+            domain=[padded_min, padded_max]))
+    ).interactive()
+
+    st.altair_chart(chart, use_container_width=True)
+
+
+def plant_soil_moisture_over_time(df, plant_id):
+    """Plots the soil moisture over time as line graph"""
+    df = df[df['plant_id'] == plant_id]
+    recorded_and_moisture = df[['recorded', 'soil_moisture']]
+    print(recorded_and_moisture)
+
+    padding = 0.8
+    min_moisture = recorded_and_moisture['soil_moisture'].min()
+    max_moisture = recorded_and_moisture['soil_moisture'].max()
+    y_range = max_moisture - min_moisture
+    padded_min = min_moisture - padding * y_range
+    padded_max = max_moisture + padding * y_range
+
+    chart = alt.Chart(recorded_and_moisture).mark_line().encode(
+        x='recorded:T',
+        y=alt.Y('soil_moisture:Q', scale=alt.Scale(
+            domain=[padded_min, padded_max]))
+    ).interactive()
+
+    st.altair_chart(chart, use_container_width=True)
 
 
 if __name__ == "__main__":
@@ -130,6 +188,11 @@ if __name__ == "__main__":
         "Plant ID", options=set(joined_df["plant_id"]))
     # TODO there is a duplicate value, can't use general name?
 
+    selected_timeframe = st.sidebar.multiselect(
+        "Time Scale", options=["Last 24h", "All time"])
+
     print(joined_df)
 
-    current_plant_data(joined_df, selected_plant)
+    print(selected_timeframe)
+    if selected_timeframe == ["Last 24h"]:
+        current_plant_data(joined_df, selected_plant)
