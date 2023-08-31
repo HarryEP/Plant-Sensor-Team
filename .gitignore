@@ -4,6 +4,7 @@ live*.json
 
 #
 data/
+plant*data.csv
 
 # terraform
 terraform.tfvars
