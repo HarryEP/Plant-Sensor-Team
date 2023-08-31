@@ -4,8 +4,8 @@ import pandas as pd
 from psycopg2.extras import RealDictCursor
 from psycopg2.extensions import connection
 from dotenv import load_dotenv
-import numpy as np
 
+PLANT_JSON = "data/live_plants.json"
 PLANTS_CSV = "data/plants.csv"
 
 
@@ -36,7 +36,11 @@ def write_to_botanist_table(conn: connection, dataframe: pd.DataFrame):
         sql = """
             INSERT INTO botanist (botanist_name, email, phone)
             VALUES (%s, %s, %s)
-            ON CONFLICT DO NOTHING
+            ON CONFLICT (botanist_name) DO UPDATE
+            SET 
+                email = EXCLUDED.email,
+                phone = EXCLUDED.phone
+            ;
             """
         cur.executemany(sql, records)
 
@@ -47,15 +51,16 @@ def write_to_plant_table(conn: connection, dataframe: pd.DataFrame):
     """Uploads plant details to the plant table in db"""
     dataframe.loc[:, "plant_id"] = dataframe["plant_id"].astype("object")
     records = dataframe.to_records(index=False)
-    
+
     with conn.cursor() as cur:
         sql = """
             INSERT INTO plant (general_name, scientific_name, cycle, plant_id, botanist_id)
             VALUES (%s, %s, %s, %s, (SELECT id FROM botanist WHERE botanist_name LIKE %s))
-            ON CONFLICT DO NOTHING;
+            ON CONFLICT (plant_id) DO UPDATE
+            SET botanist_id = EXCLUDED.botanist_id;
             """
         cur.executemany(sql, records)
-    
+
     conn.commit()
 
 
@@ -77,7 +82,7 @@ def write_to_recording_table(conn:connection, dataframe:pd.DataFrame):
             VALUES (%s, ROUND(%s, 3), ROUND(%s, 3), %s, %s, (SELECT id FROM plant WHERE plant.plant_id = %s));
             """
         cur.executemany(sql, records)
-    
+
     conn.commit() 
 
 
