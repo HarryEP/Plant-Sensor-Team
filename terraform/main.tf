@@ -40,6 +40,12 @@ resource "aws_security_group" "allow-traffic-to-dashboard"{
         protocol    = "tcp"
         cidr_blocks = ["0.0.0.0/0"]
     }
+    ingress {
+        from_port   = 8501
+        to_port     = 8501
+        protocol    = "tcp"
+        cidr_blocks = ["0.0.0.0/0"]
+    }
     egress {
         from_port        = 5432
         to_port          = 5432
@@ -254,6 +260,24 @@ resource "aws_ecs_service" "dashboard-service" {
     }
 }
 
+resource "aws_ecs_service" "pipeline-service" {
+    name                               = "plants-vs-trainees-pipeline-service"
+    cluster                            = resource.aws_ecs_cluster.cluster.id
+    task_definition                    = resource.aws_ecs_task_definition.pipeline-task-definition.arn
+    desired_count                      = 1
+    deployment_minimum_healthy_percent = 50
+    deployment_maximum_percent         = 200
+    platform_version                   = "1.4.0"
+    launch_type                        = "FARGATE"
+    scheduling_strategy                = "REPLICA"
+
+    network_configuration {
+        security_groups  = [aws_security_group.allow-traffic-to-dashboard.id]
+        subnets          = ["subnet-0667517a2a13e2a6b","subnet-0cec5bdb9586ed3c4", "subnet-03b1a3e1075174995"]
+        assign_public_ip = true
+    }
+}
+
 resource "aws_iam_role" "lambda-role" {
   name = "plants-vs-trainees-lambda-role"
   assume_role_policy = jsonencode({
@@ -297,6 +321,7 @@ resource "aws_iam_role_policy_attachment" "role-and-policy" {
   role = aws_iam_role.lambda-role.name
 }
 
+
 # resource "aws_lambda_function" "lambda-function" {
 #   function_name = "plants-vs-trainees-storage-lambda"
 #   timeout       = 5 # seconds
@@ -320,3 +345,20 @@ resource "aws_iam_role_policy_attachment" "role-and-policy" {
 #         subnet_ids          = ["subnet-0667517a2a13e2a6b","subnet-0cec5bdb9586ed3c4","subnet-03b1a3e1075174995"]
 #     }
 #   }
+
+
+# resource "aws_scheduler_schedule" "long-term-schedule" {
+#   name       = "plants-vs-trainees-long-term-schedule"
+#   group_name = "default"
+
+#   flexible_time_window {
+#     mode = "OFF"
+#   }
+
+#   schedule_expression = "0 */12 * * ? *"
+
+#   target {
+#     arn      = aws_lambda_function.lambda-function.arn
+#     role_arn = aws_iam_role.lambda-role.arn
+#   }
+# }
