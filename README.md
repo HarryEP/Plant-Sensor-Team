@@ -8,7 +8,7 @@ Please run the following to setup your database locally:  \
 
 ### Questions about data
 
-- Some plants do not have sunlight recorded; raise issue with LMNH to adjust their raspberry pi.
+- Some plants do not have sunlight recorded, some others have both full and partial sunlight; raise issue with LMNH to adjust their raspberry pi.
 
 ### Extraction findings
 
