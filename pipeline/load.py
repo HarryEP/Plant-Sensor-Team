@@ -55,7 +55,7 @@ def write_to_plant_table(conn: connection, dataframe: pd.DataFrame):
         sql = """
             INSERT INTO plant (general_name, scientific_name, cycle, plant_id, botanist_id)
             VALUES (%s, %s, %s, %s, (SELECT id FROM botanist WHERE botanist_name LIKE %s))
-            ON CONFLICT (plant_id) DO NOTHING
+            ON CONFLICT (plant_id) DO NOTHING;
             """
         cur.executemany(sql, records)
 
