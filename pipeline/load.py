@@ -38,10 +38,7 @@ def write_to_botanist_table(conn: connection, dataframe: pd.DataFrame):
         sql = """
             INSERT INTO botanist (botanist_name, email, phone)
             VALUES (%s, %s, %s)
-            ON CONFLICT (botanist_name) DO UPDATE
-            SET 
-                email = EXCLUDED.email,
-                phone = EXCLUDED.phone
+            ON CONFLICT (botanist_name) DO NOTHING
             ;
             """
         cur.executemany(sql, records)
@@ -58,8 +55,7 @@ def write_to_plant_table(conn: connection, dataframe: pd.DataFrame):
         sql = """
             INSERT INTO plant (general_name, scientific_name, cycle, plant_id, botanist_id)
             VALUES (%s, %s, %s, %s, (SELECT id FROM botanist WHERE botanist_name LIKE %s))
-            ON CONFLICT (plant_id) DO UPDATE
-            SET botanist_id = EXCLUDED.botanist_id;
+            ON CONFLICT (plant_id) DO NOTHING
             """
         cur.executemany(sql, records)
 

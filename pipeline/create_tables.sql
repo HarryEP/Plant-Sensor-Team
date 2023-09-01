@@ -18,7 +18,6 @@ CREATE TABLE plant (
     id SMALLINT GENERATED ALWAYS AS IDENTITY,
     plant_id SMALLINT NOT NULL UNIQUE,
     general_name VARCHAR NOT NULL,
-    plant_id SMALLINT UNIQUE,
     scientific_name VARCHAR,
     cycle VARCHAR,
     botanist_id SMALLINT NOT NULL,
