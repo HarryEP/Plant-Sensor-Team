@@ -193,11 +193,17 @@ def download_all_files(s3, bucket_name):
             s3.download_file(bucket_name, csv, f"archive/{csv}")
 
 
-def combine_archive_data(long_term_df, list_of_files):
+def combine_archive_data(long_term_df: pd.DataFrame, list_of_files):
     if list_of_files != []:
         for file in list_of_files:
-            long_term_df = pd.concat(
-                [long_term_df, pd.read_csv(f"archive/{file}")], axis=1)
+            # long_term_df = pd.concat(
+            #     [long_term_df, pd.read_csv(f"archive/{file}")], axis=1, ignore_index=True)
+            long_term_df = long_term_df._append(
+                pd.read_csv(f"archive/{file}"), ignore_index=True)
+            long_term_df = long_term_df[['plant_id', 'general_name',
+                                         'scientific_name', 'cycle', 'botanist_id', "recorded",
+                                         'temperature', "soil_moisture", "watered", "sunlight", "botanist_name"]]
+
     return long_term_df
 
 
@@ -251,3 +257,5 @@ if __name__ == "__main__":
     print(long_term_df)
 
     joined_df.to_csv("debug.csv")
+
+    long_term_df.to_csv("longterm.csv")
