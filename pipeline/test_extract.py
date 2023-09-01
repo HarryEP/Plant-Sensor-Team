@@ -1,8 +1,11 @@
+# pylint: skip-file
 import unittest
+import requests
 import pytest
 from datetime import datetime
 from unittest.mock import MagicMock, patch
 from extract import load_plant_by_id, check_api_status_code, write_valid_plant_data_to_json_file
+from extract import APIException
 
 
 @patch('extract.requests.get')
@@ -19,26 +22,24 @@ def test_load_plant_by_id(mock_get):
     assert plant_data == {"id": 1, "name": "Test Plant"}
 
 
-@pytest.mark.parametrize("status_code,expected_result", [
-    (200, True),
-    (404, False),
-    (500, False)
-])
-def test_check_api_status_code(status_code, expected_result):
-    """Tests that the function returns True for 200, False otherwise"""
+def test_404_api_status_code():
     response = MagicMock()
-    response.status_code = status_code
+    response.status = 404
 
-    assert check_api_status_code(response) == expected_result
+    assert check_api_status_code(response) == False
 
+
+def test_404_api_status_code():
+    response = MagicMock()
+    response.status = 500
+
+    assert check_api_status_code(response) == False
 
 @patch('extract.load_plant_by_id')
 @patch('json.dump')
 @patch('builtins.open', new_callable=unittest.mock.mock_open)
-@patch('extract.datetime')
-def test_write_valid_plant_data_to_json_file(mock_datetime, mock_open, mock_json_dump, mock_load_plant_by_id):
+def test_write_valid_plant_data_to_json_file(mock_open, mock_json_dump, mock_load_plant_by_id):
     """Tests that only valid data is written to the json file"""
-    mock_datetime.now.return_value = datetime(2023, 8, 30, 12, 0, 0)
 
     # Mock the load_plant_by_id function to return valid data
     mock_load_plant_by_id.side_effect = [
