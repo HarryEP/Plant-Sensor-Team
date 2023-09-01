@@ -320,26 +320,22 @@ resource "aws_iam_role_policy_attachment" "role-and-policy" {
   role = aws_iam_role.lambda-role.name
 }
 
-# resource "aws_lambda_function" "lambda-function" {
-#   function_name = "plants-vs-trainees-storage-lambda"
-#   timeout       = 5 # seconds
-#   image_uri     = "${aws_ecr_repository.lambda-repository.repository_url}:latest"
-#   package_type  = "Image"
+resource "aws_lambda_function" "lambda-function" {
+  function_name = "plants-vs-trainees-storage-lambda"
+  timeout       = 5 # seconds
+  image_uri     = "${aws_ecr_repository.lambda-repository.repository_url}:latest"
+  package_type  = "Image"
 
-#   role = aws_iam_role.lambda-role.arn
-#   environment {
-#   variables = {
-#         "DB_PASSWORD" = var.db_password
-#         "DB_USERNAME" = var.db_username,
-#         "DB_PORT" = var.db_port
-#         "DB_NAME" = var.db_name
-#         "ACCESS_KEY_ID" = var.access_key_id
-#         "SECRET_ACCESS_KEY" = var.secret_access_key
-#         "DB_HOST" = aws_db_instance.db-plants.endpoint
-#     }
-#   }
-#   vpc_config {
-#         security_group_ids  = [aws_security_group.allow-traffic-to-lambda.id]
-#         subnet_ids          = ["subnet-0667517a2a13e2a6b","subnet-0cec5bdb9586ed3c4","subnet-03b1a3e1075174995"]
-#     }
-#   }
+  role = aws_iam_role.lambda-role.arn
+  environment {
+  variables = {
+        "DB_PASSWORD" = var.db_password
+        "DB_USERNAME" = var.db_username,
+        "DB_PORT" = var.db_port
+        "DB_NAME" = var.db_name
+        "ACCESS_KEY_ID" = var.access_key_id
+        "SECRET_ACCESS_KEY" = var.secret_access_key
+        "DB_HOST" = aws_db_instance.db-plants.endpoint
+    }
+  }
+  }
