@@ -43,7 +43,10 @@ def join_all_sql_tables(conn: connection) -> pd.DataFrame:
 
 def dashboard_header():
     """Creates the header of the dashboard"""
-    st.markdown("### Plants Dashboard")
+    st.title("LMNH Plant Data Dashboard")
+    st.markdown("""Information about the plant data within LMNH:
+                
+                PLEASE NOTE: changing the data in the sidebar affects all graphs.""")
 
 
 def headline_plant_figures(dataframe: pd.DataFrame):
@@ -119,31 +122,38 @@ def current_plant_data(df: pd.DataFrame, plant_ids: list):
             # Display the dataframe
             st.dataframe(display_df)
 
-            # TODO error handling, some plants don't have recorded
-            try:
-                plant_temperature_over_time(joined_df, plant_ids[0])
-                plant_soil_moisture_over_time(joined_df, plant_ids[0])
-            except:
-                print("Graphs can't be plotted")
+            plant_temperature_over_time(joined_df, plant_ids)
+            plant_soil_moisture_over_time(joined_df, plant_ids)
 
             plant_image = get_image_url_of_plant(plant_name)
 
             if plant_image is not None:
                 st.image(get_image_url_of_plant(plant_name), caption='')
 
+        if len(plant_ids) > 1:
+            display_df = plant_df[['plant_id', 'recorded',
+                                   'temperature', 'soil_moisture', 'watered']]
+            # Display the dataframe
+            st.dataframe(display_df)
+            plant_temperature_over_time(joined_df, plant_ids)
+            plant_soil_moisture_over_time(joined_df, plant_ids)
+
         else:
             st.dataframe(plant_df)
 
 
-def plant_temperature_over_time(df: pd.DataFrame, plant_id: int):
+def plant_temperature_over_time(df: pd.DataFrame, plant_ids: list):
     """Plots the plant temperature over time as line graph"""
-    df = df[df['plant_id'] == plant_id]
-    recorded_and_temperature = df[['recorded', 'temperature']]
+    df = df[df['plant_id'].isin(plant_ids)]
+    print(df)
+    recorded_and_temperature = df[['plant_id', 'recorded', 'temperature']]
+    print("*" * 31)
     print(recorded_and_temperature)
 
     padding = 0.8
     min_temperature = recorded_and_temperature['temperature'].min()
     max_temperature = recorded_and_temperature['temperature'].max()
+    average_temperature = recorded_and_temperature['temperature'].mean()
     y_range = max_temperature - min_temperature
     padded_min = min_temperature - padding * y_range
     padded_max = max_temperature + padding * y_range
@@ -151,29 +161,35 @@ def plant_temperature_over_time(df: pd.DataFrame, plant_id: int):
     chart = alt.Chart(recorded_and_temperature).mark_line().encode(
         x='recorded:T',
         y=alt.Y('temperature:Q', scale=alt.Scale(
-            domain=[padded_min, padded_max]))
-    ).interactive()
+            domain=[padded_min, padded_max])),
+        color='plant_id:N').interactive()
 
-    st.altair_chart(chart, use_container_width=True)
     st.markdown("<br>", unsafe_allow_html=True)
 
-    # cols = st.columns(3)
+    st.subheader("Plant temperature over time")
 
-    # with cols[0]:
-    #     st.write(f"Minimum Temperature: {min_temperature} ")
-    # with cols[1]:
-    #     st.write(f"Maximum Temperature: {max_temperature} ")
+    cols = st.columns(3)
+
+    with cols[0]:
+        st.write(f"Minimum Temperature: {min_temperature:.3f} ")
+    with cols[1]:
+        st.write(f"Average Temperature: {average_temperature:.3f} ")
+    with cols[2]:
+        st.write(f"Maximum Temperature: {max_temperature:.3f} ")
+
+    st.altair_chart(chart, use_container_width=True)
 
 
-def plant_soil_moisture_over_time(df: pd.DataFrame, plant_id: int):
+def plant_soil_moisture_over_time(df: pd.DataFrame, plant_ids: list):
     """Plots the soil moisture over time as line graph"""
-    df = df[df['plant_id'] == plant_id]
-    recorded_and_moisture = df[['recorded', 'soil_moisture']]
+    df = df[df['plant_id'].isin(plant_ids)]
+    recorded_and_moisture = df[['plant_id', 'recorded', 'soil_moisture']]
     print(recorded_and_moisture)
 
     padding = 0.8
     min_moisture = recorded_and_moisture['soil_moisture'].min()
     max_moisture = recorded_and_moisture['soil_moisture'].max()
+    average_moisture = recorded_and_moisture['soil_moisture'].mean()
     y_range = max_moisture - min_moisture
     padded_min = min_moisture - padding * y_range
     padded_max = max_moisture + padding * y_range
@@ -181,8 +197,21 @@ def plant_soil_moisture_over_time(df: pd.DataFrame, plant_id: int):
     chart = alt.Chart(recorded_and_moisture).mark_line().encode(
         x='recorded:T',
         y=alt.Y('soil_moisture:Q', scale=alt.Scale(
-            domain=[padded_min, padded_max]))
-    ).interactive()
+            domain=[padded_min, padded_max])),
+        color='plant_id:N').interactive()
+
+    st.markdown("<br>", unsafe_allow_html=True)
+
+    st.subheader("Soil moisture over time")
+
+    cols = st.columns(3)
+
+    with cols[0]:
+        st.write(f"Minimum Moisture: {min_moisture:.3f} ")
+    with cols[1]:
+        st.write(f"Average Moisture: {average_moisture:.3f} ")
+    with cols[2]:
+        st.write(f"Maximum Moisture: {max_moisture:.3f} ")
 
     st.altair_chart(chart, use_container_width=True)
 
@@ -251,6 +280,7 @@ if __name__ == "__main__":
 
     if (selected_plant and selected_timeframe) == []:
         headline_plant_figures(joined_df)
+        st.dataframe(joined_df)
 
     print(joined_df)
 
