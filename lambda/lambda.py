@@ -49,7 +49,6 @@ def get_plant_data(conn):
 
 def lambda_handler(event, context):
     '''function to upload to aws lambda'''
-
     load_dotenv()
 
     conn = get_connection(host_name=os.environ["DB_HOST"], db_name=os.environ["DB_NAME"],
@@ -57,7 +56,7 @@ def lambda_handler(event, context):
 
     df = get_plant_data(conn)
 
-    df.to_csv(f'/tmp/plant_{datetime.date.today()}_data.csv', index=False)
+    df.to_csv(f'/tmp/plant_{datetime.date.today()}_data.csv')
 
     amazon_s3 = client("s3", region_name="eu-west-2",
                        aws_access_key_id=os.environ["ACCESS_KEY_ID"],
