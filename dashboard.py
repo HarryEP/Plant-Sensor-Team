@@ -155,6 +155,14 @@ def plant_temperature_over_time(df: pd.DataFrame, plant_id: int):
     ).interactive()
 
     st.altair_chart(chart, use_container_width=True)
+    st.markdown("<br>", unsafe_allow_html=True)
+
+    # cols = st.columns(3)
+
+    # with cols[0]:
+    #     st.write(f"Minimum Temperature: {min_temperature} ")
+    # with cols[1]:
+    #     st.write(f"Maximum Temperature: {max_temperature} ")
 
 
 def plant_soil_moisture_over_time(df: pd.DataFrame, plant_id: int):
