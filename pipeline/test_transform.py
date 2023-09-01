@@ -22,7 +22,7 @@ def test_cleaning_botanist():
 
     result = cleaning_botanist(dataframe)
 
-    assert "plant_name" in result.columns
+    assert "botanist_name" in result.columns
     assert "email" in result.columns
     assert "phone" in result.columns
     assert "botanist" not in result.columns
