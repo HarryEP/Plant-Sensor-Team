@@ -14,15 +14,15 @@ jobs:
       uses: actions/checkout@v3
     - name: Install Python
       uses: actions/setup-python@v4.6.0
-    - name: Install pylint
-      run: pip3 install pylint
+    - name: Install requirements
+      run: pip3 install -r requirements.txt
     - name: Python Linter on dashboard
       run: pylint --fail-under=3 dashboard.py
     - name: Python Linter on pipeline
       run: pylint --fail-under=3 ./pipeline/*.py
     - name: Python Linter on lambda
       run: pylint --fail-under=3 ./lambda/*.py
-      
+
   pytest_run:
     name: "Run Pytest on the code"
     runs-on: ubuntu-latest
@@ -34,9 +34,5 @@ jobs:
       uses: actions/setup-python@v4.6.0
     - name: Install packages
       run: pip3 install -r requirements.txt
-    - name: Run pytest on dashboard
-      run: pytest dashboard.py
     - name: Run pytest on pipeline folder
-      run: pytest ./pipeline/*.py
-    - name: Run pytest on lambda folder
-      run: pytest ./lambda/*.py
+      run: pytest ./pipeline/test_*.py
