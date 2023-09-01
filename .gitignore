@@ -4,6 +4,10 @@ live*.json
 
 #
 data/
+plant*data.csv
+
+# jupyter
+*.ipynb
 
 # terraform
 terraform.tfvars

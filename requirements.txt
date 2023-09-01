@@ -1,6 +1,11 @@
 boto3
 requests
 pandas
-python-dotenv
 psycopg2-binary
+python-dotenv
 streamlit
+pytest
+pylint
+boto3
+botocore
+datetime
