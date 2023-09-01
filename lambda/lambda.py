@@ -1,13 +1,16 @@
+'''This module takes the plant data from the data base and 
+uploads it to a csv in the bucket for each day'''
 import os
+import datetime
 import pandas as pd
 import psycopg2
 from psycopg2.extras import RealDictCursor
 from dotenv import load_dotenv
 from boto3 import client
-import datetime
 
 
 def get_connection(host_name, db_name, password, user):
+    '''this function is used for getting a connection to the database'''
     conn = psycopg2.connect(host=host_name,
                             dbname=db_name,
                             password=password,
@@ -17,6 +20,7 @@ def get_connection(host_name, db_name, password, user):
 
 
 def get_plant_data(conn):
+    '''this function extracts all the necessary plant data from the database'''
     with conn.cursor() as cur:
         sql = """SELECT
     plant.id AS plant_id,
@@ -38,13 +42,14 @@ def get_plant_data(conn):
         cur.execute(sql)
         result = cur.fetchall()
 
-    df = pd.DataFrame(result, columns=['plant_id', 'general_name',
-                                       'scientific_name', 'cycle', 'botanist_id', "recorded",
-                                       'temperature', "soil_moisture", "watered", "sunlight", "botanist_name"])
+    dataframe = pd.DataFrame(result, columns=['plant_id', 'general_name',
+                                              'scientific_name', 'cycle', 'botanist_id', "recorded",
+                                              'temperature', "soil_moisture",
+                                              "watered", "sunlight", "botanist_name"])
 
     conn.commit()
 
-    return df
+    return dataframe
 
 
 def lambda_handler(event, context):
@@ -54,9 +59,9 @@ def lambda_handler(event, context):
     conn = get_connection(host_name=os.environ["DB_HOST"], db_name=os.environ["DB_NAME"],
                           password=os.environ["DB_PASSWORD"], user=os.environ["DB_USERNAME"])
 
-    df = get_plant_data(conn)
+    dataframe = get_plant_data(conn)
 
-    df.to_csv(f'/tmp/plant_{datetime.date.today()}_data.csv')
+    dataframe.to_csv(f'/tmp/plant_{datetime.date.today()}_data.csv')
 
     amazon_s3 = client("s3", region_name="eu-west-2",
                        aws_access_key_id=os.environ["ACCESS_KEY_ID"],
