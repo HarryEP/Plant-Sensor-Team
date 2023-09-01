@@ -6,6 +6,9 @@ live*.json
 data/
 plant*data.csv
 
+#csv 
+debug.csv
+longterm.csv
 # jupyter
 *.ipynb
 
