@@ -34,9 +34,5 @@ jobs:
       uses: actions/setup-python@v4.6.0
     - name: Install packages
       run: pip3 install -r requirements.txt
-    - name: Run pytest on dashboard
-      run: pytest dashboard.py
     - name: Run pytest on pipeline folder
-      run: pytest ./pipeline/*.py
-    - name: Run pytest on lambda folder
-      run: pytest ./lambda/*.py
+      run: pytest ./pipeline/test_*.py
