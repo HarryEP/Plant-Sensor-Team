@@ -1,0 +1,8 @@
+boto3
+requests
+pandas
+psycopg2-binary
+python-dotenv
+streamlit
+boto3
+botocore

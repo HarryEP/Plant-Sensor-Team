@@ -6,6 +6,5 @@ python-dotenv
 streamlit
 pytest
 pylint
-boto3
 botocore
 datetime
