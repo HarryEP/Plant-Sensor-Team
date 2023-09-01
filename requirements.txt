@@ -3,8 +3,8 @@ pandas
 psycopg2-binary
 python-dotenv
 streamlit
+pytest
 pylint
 boto3
 botocore
-psycopg2-binary
 datetime
