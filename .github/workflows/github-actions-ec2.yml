@@ -17,11 +17,11 @@ jobs:
     - name: Install pylint
       run: pip3 install pylint
     - name: Python Linter on dashboard
-      run: pylint --fail-under=8 dashboard.py
+      run: pylint dashboard.py
     - name: Python Linter on pipeline
-      run: pylint --fail-under=8 ./pipeline/*.py
+      run: pylint ./pipeline/*.py
     - name: Python Linter on lambda
-      run: pylint --fail-under=8 ./lambda/*.py
+      run: pylint ./lambda/*.py
       
   pytest_run:
     name: "Run Pytest on the code"
