@@ -82,7 +82,7 @@ def test_clean_sunlight_column_valid_value():
 
 
 def test_clean_sunlight_column_invalid_value():
-    """Tests that the function applies the convert sunlight function 
+    """Tests that the function applies the convert sunlight function
     for an invalid value to the dataframe"""
     dataframe = pd.DataFrame({
         "sunlight": [["extremely sunny", "very hot"]],
