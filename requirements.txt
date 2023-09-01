@@ -4,4 +4,8 @@ psycopg2-binary
 python-dotenv
 streamlit
 pylint
+boto3
+botocore
+psycopg2-binary
+datetime
 
