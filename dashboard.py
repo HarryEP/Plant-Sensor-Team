@@ -1,18 +1,17 @@
 """This module creates the dashboard for the plants"""
+import os
 from os import environ
 import pandas as pd
 import streamlit as st
-from PIL import Image
 import altair as alt
 import psycopg2
 from dotenv import load_dotenv
-import numpy as np
 import requests
 from boto3 import client
-import os
+from psycopg2.extensions import connection
 
 
-def join_all_sql_tables(conn) -> pd.DataFrame:
+def join_all_sql_tables(conn: connection) -> pd.DataFrame:
     """Joins all tables from SQL and returns it as a dataframe"""
     query = """SELECT
     p.id AS plant_id,
@@ -47,7 +46,7 @@ def dashboard_header():
     st.markdown("### Plants Dashboard")
 
 
-def headline_plant_figures(dataframe):
+def headline_plant_figures(dataframe: pd.DataFrame):
     """Creates a small widget outlining some stats"""
     cols = st.columns(2)
     with cols[0]:
@@ -59,7 +58,7 @@ def headline_plant_figures(dataframe):
         st.metric("Botanist with the most plants", most_plants_botanist)
 
 
-def get_image_url_of_plant(plant_name):
+def get_image_url_of_plant(plant_name: str) -> str:
     """Returns the image url of a given plant"""
 
     load_dotenv()
@@ -70,7 +69,7 @@ def get_image_url_of_plant(plant_name):
     # API endpoint URL
     url = f"https://trefle.io/api/v1/plants/search?token={api_token}&q={plant_name}"
 
-    response = requests.get(url)
+    response = requests.get(url, timeout=10)
 
     if response.status_code == 200:
         data = response.json()
@@ -81,8 +80,10 @@ def get_image_url_of_plant(plant_name):
 
             return image_url
 
+    return None
 
-def current_plant_data(df, plant_ids: list):
+
+def current_plant_data(df: pd.DataFrame, plant_ids: list):
     """Displays dataframe with info for plant(s)"""
     if len(plant_ids) != 0:
         plant_df = df[df['plant_id'].isin(plant_ids)]
@@ -127,14 +128,14 @@ def current_plant_data(df, plant_ids: list):
 
             plant_image = get_image_url_of_plant(plant_name)
 
-            if plant_image != None:
+            if plant_image is not None:
                 st.image(get_image_url_of_plant(plant_name), caption='')
 
         else:
             st.dataframe(plant_df)
 
 
-def plant_temperature_over_time(df, plant_id):
+def plant_temperature_over_time(df: pd.DataFrame, plant_id: int):
     """Plots the plant temperature over time as line graph"""
     df = df[df['plant_id'] == plant_id]
     recorded_and_temperature = df[['recorded', 'temperature']]
@@ -156,7 +157,7 @@ def plant_temperature_over_time(df, plant_id):
     st.altair_chart(chart, use_container_width=True)
 
 
-def plant_soil_moisture_over_time(df, plant_id):
+def plant_soil_moisture_over_time(df: pd.DataFrame, plant_id: int):
     """Plots the soil moisture over time as line graph"""
     df = df[df['plant_id'] == plant_id]
     recorded_and_moisture = df[['recorded', 'soil_moisture']]
@@ -178,14 +179,14 @@ def plant_soil_moisture_over_time(df, plant_id):
     st.altair_chart(chart, use_container_width=True)
 
 
-def list_all_csv_files_in_bucket(s3, bucket_name) -> list:
+def list_all_csv_files_in_bucket(s3: client, bucket_name: str) -> list:
     """Lists all the csv files within an S3 bucket"""
     return [obj["Key"]for obj in s3.list_objects(Bucket=bucket_name)["Contents"]
             if obj["Key"].endswith(".csv")]
 
 
-def download_all_files(s3, bucket_name):
-    # archived_dataframe =
+def download_all_files(s3: client, bucket_name: str):
+    """Downloads all the files within a bucket"""
     for csv in list_all_csv_files_in_bucket(s3, bucket_name):
         if not os.path.exists("archive"):
             os.mkdir("archive")
@@ -193,16 +194,16 @@ def download_all_files(s3, bucket_name):
             s3.download_file(bucket_name, csv, f"archive/{csv}")
 
 
-def combine_archive_data(long_term_df: pd.DataFrame, list_of_files):
-    if list_of_files != []:
+def combine_archive_data(long_term_df: pd.DataFrame, list_of_files: list) -> pd.DataFrame:
+    """Combines all the archival data from the csv files to a dataframe"""
+    if list_of_files:
         for file in list_of_files:
-            # long_term_df = pd.concat(
-            #     [long_term_df, pd.read_csv(f"archive/{file}")], axis=1, ignore_index=True)
-            long_term_df = long_term_df._append(
-                pd.read_csv(f"archive/{file}"), ignore_index=True)
-            long_term_df = long_term_df[['plant_id', 'general_name',
-                                         'scientific_name', 'cycle', 'botanist_id', "recorded",
-                                         'temperature', "soil_moisture", "watered", "sunlight", "botanist_name"]]
+            long_term_df = (
+                long_term_df
+                ._append(pd.read_csv(f"archive/{file}"), ignore_index=True)
+                .filter(['plant_id', 'general_name', 'scientific_name', 'cycle', 'botanist_id',
+                        'recorded', 'temperature', 'soil_moisture', 'watered', 'sunlight',
+                         'botanist_name']))
 
     return long_term_df
 
@@ -234,7 +235,6 @@ if __name__ == "__main__":
 
     selected_plant = st.sidebar.multiselect(
         "Plant ID", options=set(joined_df["plant_id"]))
-    # TODO there is a duplicate value, can't use general name?
 
     selected_timeframe = st.sidebar.multiselect(
         "Time Scale", options=["Last 24h", "All time"])
