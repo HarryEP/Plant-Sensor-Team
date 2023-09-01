@@ -1,4 +1,6 @@
+boto3
 requests
 pandas
 python-dotenv
+psycopg2-binary
 streamlit
